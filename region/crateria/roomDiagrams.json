@@ -2,7 +2,21 @@
   "8": {
     "origin": [17, 0],
     "width": 9,
-    "height": 5
+    "height": 5,
+    "blocks": [
+      {
+        "type": "bomb",
+        "origin": [31,37],
+        "width": 8,
+        "height": 4
+      },
+      {
+        "type": "bomb",
+        "origin": [106,74],
+        "width": 11,
+        "height": 3
+      }
+    ]
   },
   "9": {
     "origin": [26, 4]
@@ -26,6 +40,24 @@
         "origin": [2, 3],
         "width": 3
       }
+    ],
+    "blocks": [
+      {
+        "type": "bomb",
+        "origin": [15,7],
+        "width": 2,
+        "height": 3
+      },
+      {
+        "type": "bomb",
+        "origin": [61,11],
+        "width": 2
+      },
+      {
+        "type": "bomb",
+        "origin": [65,11],
+        "width": 2
+      }
     ]
   },
   "11": {
@@ -37,12 +69,50 @@
         "name": "Pit Room",
         "origin": [2, 8]
       }
+    ],
+    "blocks": [
+      {
+        "type": "bomb",
+        "origin": [30,5],
+        "width": 2
+      },
+      {
+        "type": "bomb",
+        "origin": [30,118],
+        "width": 2
+      },
+      {
+        "type": "bomb",
+        "origin": [16,134],
+        "width": 2,
+        "height": 4
+      }
     ]
   },
   "12": {
     "origin": [14, 17],
     "width": 3,
-    "height": 2
+    "height": 2,
+    "blocks": [
+      {
+        "type": "bomb",
+        "origin": [5,10]
+      },
+      {
+        "type": "bomb",
+        "origin": [4,11],
+        "width": 3,
+        "height": 3
+      },
+      {
+        "type": "bomb",
+        "origin": [4,14]
+      },
+      {
+        "type": "bomb",
+        "origin": [6,14]
+      }
+    ]
   },
   "13": {
     "origin": [16, 6],
@@ -63,7 +133,35 @@
   },
   "18": {
     "origin": [11, 7],
-    "width": 2
+    "width": 2,
+    "blocks": [
+      {
+        "type": "false",
+        "origin": [5,7],
+        "width": 20
+      },
+      {
+        "type": "crumble",
+        "origin": [23,8],
+        "width": 2
+      },
+      {
+        "type": "bomb",
+        "origin": [5,9]
+      },
+      {
+        "type": "bomb",
+        "origin": [8,9]
+      },
+      {
+        "type": "bomb",
+        "origin": [11,9]
+      },
+      {
+        "type": "bomb",
+        "origin": [14,9]
+      }
+    ]
   },
   "19": {
     "origin": [19, 6]
@@ -75,7 +173,14 @@
   "29": {
     "origin": [14, 9],
     "width": 5,
-    "height": 8
+    "height": 8,
+    "blocks": [
+      {
+        "type": "speed",
+        "origin": [70,10],
+        "width": 4
+      }
+    ]
   },
   "306": {
     "origin": [17, 17]
@@ -83,12 +188,26 @@
   "7": {
     "origin": [30, 4],
     "width": 2,
-    "height": 2
+    "height": 2,
+    "blocks": [
+      {
+        "type": "bomb",
+        "origin": [14,24]
+      }
+    ]
   },
   "24": {
     "origin": [27, 4],
     "width": 3,
-    "height": 3
+    "height": 3,
+    "blocks": [
+      {
+        "type": "bomb",
+        "origin": [23,13],
+        "width": 2,
+        "height": 2
+      }
+    ]
   },
   "25": {
     "origin": [28, 7]
@@ -102,6 +221,50 @@
         "name": "Bowling Alley Path/Homing Geemer Room",
         "origin": [3, 2],
         "width": 3
+      }
+    ],
+    "blocks": [
+      {
+        "type": "super",
+        "origin": [7,38]
+      },
+      {
+        "type": "false",
+        "origin": [7,39],
+        "height": 5
+      },
+      {
+        "type": "bomb",
+        "origin": [5,44],
+        "width": 2
+      },
+      {
+        "type": "false",
+        "origin": [9,47],
+        "height": 4
+      },
+      {
+        "type": "crumble",
+        "origin": [9,51]
+      },
+      {
+        "type": "bomb",
+        "origin": [8,49]
+      },
+      {
+        "type": "bomb",
+        "origin": [21,38],
+        "height": 2
+      },
+      {
+        "type": "false",
+        "origin": [23,91],
+        "width": 13
+      },
+      {
+        "type": "bomb",
+        "origin": [36,91],
+        "width": 2
       }
     ]
   },
@@ -121,7 +284,58 @@
   "36": {
     "origin": [47, 8],
     "width": 4,
-    "height": 2
+    "height": 2,
+    "blocks": [
+      {
+        "type": "false",
+        "origin": [10,15],
+        "width": 2,
+        "height": 5
+      },
+      {
+        "type": "bomb",
+        "origin": [11,14]
+      },
+      {
+        "type": "bomb",
+        "origin": [10,20]
+      },
+      {
+        "type": "false",
+        "origin": [29,23],
+        "width": 6,
+        "height": 3
+      },
+      {
+        "type": "crumble",
+        "origin": [29,26]
+      },
+      {
+        "type": "false",
+        "origin": [34,26],
+        "height": 2
+      },
+      {
+        "type": "bomb",
+        "origin": [34,28]
+      },
+      {
+        "type": "crumble",
+        "origin": [47,9],
+        "height": 2
+      },
+      {
+        "type": "crumble",
+        "origin": [44,12],
+        "height": 2
+      },
+      {
+        "type": "crumble",
+        "origin": [44,17],
+        "width": 2,
+        "height": 2
+      }
+    ]
   },
   "37": {
     "origin": [46, 10]
@@ -139,7 +353,40 @@
   },
   "21": {
     "origin": [5, 2],
-    "height": 7
+    "height": 7,
+    "blocks": [
+      {
+        "type": "bomb",
+        "origin": [6,6],
+        "width": 4,
+        "height": 4
+      },
+      {
+        "type": "bomb",
+        "origin": [10,6],
+        "width": 2
+      },
+      {
+        "type": "bomb",
+        "origin": [10,7]
+      },
+      {
+        "type": "bomb",
+        "origin": [10,9]
+      },
+      {
+        "type": "bomb",
+        "origin": [4,22],
+        "width": 8,
+        "height": 6
+      },
+      {
+        "type": "crumble",
+        "origin": [6,10],
+        "width": 4,
+        "height": 20
+      }
+    ]
   },
   "22": {
     "origin": [1, 8],

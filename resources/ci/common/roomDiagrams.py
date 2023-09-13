@@ -19,6 +19,7 @@ def coord_calc(origin,dims):
 
 roomIDs = {}
 cleanIDs = []
+annotatedIDs = []
 
 rootPath = os.path.join(
     ".",
@@ -83,15 +84,18 @@ def search_doorways(rootPath):
     for r,_,f in os.walk(rootPath):
         for filename in f:
             # if it's a .png
+            # if it's not annotated
             # if it's a clean map
             # if it's a roomDiagram
             # if it's not a roomPathway
+            # if it's not a search template
             # if it's not a testPathway
             if ".png" in filename and \
+                "annotated" not in r and \
                 "clean" in r and \
-                "search_" not in filename and \
                 "roomDiagrams" in r and \
                 "roomPathways" not in r and \
+                "search_" not in filename and \
                 "testPathways" not in r:
                 roomImg = cv2.imread(
                     os.path.join(
@@ -187,14 +191,16 @@ def test_pathways(rootPath):
     for r,_,f in os.walk(rootPath):
         for filename in f:
             # it's a .png
+            # it's not annotated
+            # it's not a clean map
             # it's a roomDiagram
             # it's a roomPathway
-            # it's not a clean map
             # it's not a testPathway
             if ".png" in filename and \
+                "annotated" not in r and \
+                "clean" not in r and \
                 "roomDiagrams" in r and \
                 "roomPathways" in r and \
-                "clean" not in r and \
                 "testPathways" not in r:
                 if not os.path.isdir(
                     os.path.join(
@@ -239,12 +245,14 @@ def lift_pathways(rootPath):
     for r,_,f in os.walk(rootPath):
         for filename in f:
             # it's a .png
-            # it's a roomDiagram
+            # it's not annotated
             # it's not a clean map
+            # it's a roomDiagram
             # it's not a roomPathway
             if ".png" in filename and \
-                "roomDiagrams" in r and \
+                "annotated" not in r and \
                 "clean" not in r and \
+                "roomDiagrams" in r and \
                 "roomPathways" not in r:
                 if not os.path.isdir(
                     os.path.join(
@@ -289,6 +297,169 @@ def lift_pathways(rootPath):
                         print(".", end="")
                 roomImg.save(os.path.join(".",r,"roomPathways",filename))
                 print()
+
+def make_annotated(rootPath):
+    '''
+    Use clean map and add special blocks
+    '''
+    for r,_,f in os.walk(rootPath):
+        for filename in f:
+            if "region_" in filename or "roomDiagrams.json" in filename:
+                f.remove(filename)
+                f.append(filename)
+        for filename in f:
+            if ".json" in filename and "roomDiagrams" not in filename:
+                # JSON Files
+                with open(os.path.join(r, filename), "r", encoding="utf-8") as regionFile:
+                    regionJSON = json.load(regionFile)
+                    area = ""
+                    subarea = ""
+                    subsubarea = ""
+                    if "rooms" in regionJSON:
+                        for room in regionJSON["rooms"]:
+                            areaPath = os.path.dirname(os.path.join(r, filename)).split(os.sep)
+                            area = room["area"]
+                            subarea = room["subarea"]
+                            subsubarea = (room["subsubarea"] if ("subsubarea" in room) else subsubarea)
+                            areaSlug = areaPath[-1]
+                            subareaSlug = os.path.splitext(filename)[0]
+                            roomIDs[str(room["id"])] = {
+                                "name": room["name"],
+                                "area": area,
+                                "subarea": subarea,
+                                "areaSlug": areaSlug,
+                                "subareaSlug": subareaSlug,
+                                "doors": 0
+                            }
+                            for node in room["nodes"]:
+                                if node["nodeType"] == "door" and node["nodeSubType"] != "elevator":
+                                    roomIDs[str(room["id"])]["doors"] += 1
+                            if subsubarea != "":
+                                roomIDs[str(room["id"])]["subsubsarea"] = subsubarea
+                        msg = f"> Reading {area}/{subarea}"
+                        if subsubarea != "":
+                            msg += f"/{subsubarea}"
+                        print(msg)
+                    else:
+                        print(f"!!! {os.path.join(r,filename)} has no rooms!")
+            # get clean image
+            # paste blocks onto clean image
+            # save as annotated image
+            if ".png" in filename and "roomDiagrams" in r and "west" in filename:
+                pattern = r"([^_]+)_([^_]+)_([^.]+)(?:.png)"
+                matches = re.match(pattern, filename)
+                roomID = 0
+                if matches:
+                    area = matches.group(1)
+                    roomID = matches.group(2)
+                    roomName = matches.group(3).replace("-","")
+                    roomName = roomName.replace("Kraids","Kraid")
+                    filename = f"{area}_{roomID}_{roomName}.png"
+                if not os.path.isdir(
+                    os.path.join(
+                        ".",
+                        r,
+                        "annotated"
+                    )
+                ):
+                    os.makedirs(
+                        os.path.join(
+                            ".",
+                            r,
+                            "annotated"
+                        )
+                    )
+                if os.path.isfile(os.path.join(r, "..", "roomDiagrams.json")):
+                    with open(
+                        os.path.join(
+                            r,
+                            "..",
+                            "roomDiagrams.json"
+                        ),
+                        mode="r",
+                        encoding="utf-8"
+                    ) as roomDataFile:
+                        roomDataJSON = json.load(roomDataFile)
+                        with Image.open(
+                            os.path.join(
+                                r,
+                                "clean",
+                                filename
+                            )
+                        ) as annotated_image:
+                            annotated_image = annotated_image.convert("RGB")
+                            mapOrigin = [0, 0]
+                            if roomID in roomDataJSON.keys():
+                                roomData = roomDataJSON[roomID]
+                                subareaSlug = "unknownSubArea"
+                                roomName = "unknownRoom"
+                                if roomID in roomIDs:
+                                    areaSlug = roomIDs[roomID]["areaSlug"]
+                                    subareaSlug = roomIDs[roomID]["subareaSlug"]
+                                    roomName = roomIDs[roomID]["name"]
+                                    if areaSlug == "ceres":
+                                        subareaSlug = "ceres"
+                                print(f"  > Building {roomID.rjust(3)}: {roomName}")
+                                roomOrigin = mapOrigin
+                                if "offset" in roomData:
+                                    (rX, rY) = roomOrigin
+                                    rX = rX + roomData["offset"][0]
+                                    rY = rY + roomData["offset"][1]
+                                    roomOrigin = (rX, rY)
+                                width = roomData["width"] if "width" in roomData else 1
+                                height = roomData["height"] if "height" in roomData else 1
+                                if "blocks" in roomData:
+                                    for block in roomData["blocks"]:
+                                        if "name" in block or "type" in block:
+                                            title = block["name"] if "name" in block else ""
+                                            title = block["type"] if title == "" else title
+                                            print(f"   > Block: {title}")
+                                            pass
+                                        origin = block["origin"] if "origin" in block else [0, 0]
+                                        width = block["width"] if "width" in block else 1
+                                        height = block["height"] if "height" in block else 1
+                                        black_img = Image.new(
+                                            "RGB",
+                                            (width * 16, height * 16)
+                                        )
+
+                                        if "type" in block:
+                                            block_type_filepath = os.path.join(
+                                                ".",
+                                                "resources",
+                                                "ci",
+                                                "images",
+                                                "blocks",
+                                                block["type"] + ".png"
+                                            )
+                                            if os.path.isfile(block_type_filepath):
+                                                with Image.open(block_type_filepath) as block_img:
+                                                    for x in range(width):
+                                                        for y in range(height):
+                                                            black_img.paste(
+                                                                block_img,
+                                                                (
+                                                                    16 * x,
+                                                                    16 * y
+                                                                )
+                                                            )
+                                        annotated_image.paste(
+                                            black_img,
+                                            (
+                                                origin[0] * 16,
+                                                origin[1] * 16
+                                            )
+                                        )
+                                roomName = re.sub(r"[^\w\d]", "", roomName)
+                                annotated_image.save(
+                                    os.path.join(
+                                        ".",
+                                        r,
+                                        "annotated",
+                                        f"{subareaSlug}_{roomID}_{roomName}.png"
+                                    )
+                                )
+                                annotatedIDs.append(roomID)
 
 def make_clean(rootPath):
     '''
@@ -436,10 +607,11 @@ def make_clean(rootPath):
                                 )
                                 cleanIDs.append(roomID)
 
-make_clean(rootPath)
+# make_clean(rootPath)
+make_annotated(rootPath)
 # lift_pathways(rootPath)
 # test_pathways(rootPath)
-search_doorways(rootPath)
+# search_doorways(rootPath)
 
 # No 53, 72, 73, 221
 # End is 242
