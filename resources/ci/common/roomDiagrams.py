@@ -93,6 +93,7 @@ def search_doorways(rootPath):
             if ".png" in filename and \
                 "annotated" not in r and \
                 "clean" in r and \
+                "search_" not in filename and \
                 "roomDiagrams" in r and \
                 "roomPathways" not in r and \
                 "search_" not in filename and \
@@ -103,7 +104,8 @@ def search_doorways(rootPath):
                         filename
                     )
                 )
-                roomID = re.match(r"(?:[^\_]*)(?:[\_])([\d]+)(?:[\_])(?:[^_]*)", filename).group(1)
+                # roomID = re.match(r"(?:[^\_]*)(?:[\_])([\d]+)(?:[\_])(?:[^_]*)", filename).group(1)
+                roomID = re.match(r"(?:[^\_]*)(?:[\_])(?:[^_]*)(?:[\_])([\d]+)", filename).group(1)
                 room = roomIDs[roomID]
                 if roomID not in [
                     "305",  # Crateria/East/Forgotten Highway Elbow
@@ -195,12 +197,14 @@ def test_pathways(rootPath):
             # it's not a clean map
             # it's a roomDiagram
             # it's a roomPathway
+            # it's not a clean map
             # it's not a testPathway
             if ".png" in filename and \
                 "annotated" not in r and \
                 "clean" not in r and \
                 "roomDiagrams" in r and \
                 "roomPathways" in r and \
+                "clean" not in r and \
                 "testPathways" not in r:
                 if not os.path.isdir(
                     os.path.join(
@@ -220,7 +224,8 @@ def test_pathways(rootPath):
                 pathImg = pathImg.convert("RGBA")
                 cleanImg = Image.open(os.path.join(r, filename).replace("roomPathways", "clean"))
                 cleanImg = cleanImg.convert("RGBA")
-                roomID = re.match(r"(?:[^\_]*)(?:[\_])([\d]+)(?:[\_])(?:[^_]*)", filename).group(1)
+                # roomID = re.match(r"(?:[^\_]*)(?:[\_])([\d]+)(?:[\_])(?:[^_]*)", filename).group(1)
+                roomID = re.match(r"(?:[^\_]*)(?:[\_])(?:[^_]*)(?:[\_])([\d]+)", filename).group(1)
                 if roomID in roomIDs:
                     # areaSlug = roomIDs[roomID]["areaSlug"]
                     # subareaSlug = roomIDs[roomID]["subareaSlug"]
@@ -248,11 +253,13 @@ def lift_pathways(rootPath):
             # it's not annotated
             # it's not a clean map
             # it's a roomDiagram
+            # it's not a clean map
             # it's not a roomPathway
             if ".png" in filename and \
                 "annotated" not in r and \
                 "clean" not in r and \
                 "roomDiagrams" in r and \
+                "clean" not in r and \
                 "roomPathways" not in r:
                 if not os.path.isdir(
                     os.path.join(
@@ -270,7 +277,8 @@ def lift_pathways(rootPath):
                     )
                 roomImg = Image.open(os.path.join(r, filename))
                 roomImg = roomImg.convert("RGBA")
-                roomID = re.match(r"(?:[^\_]*)(?:[\_])([\d]+)(?:[\_])(?:[^_]*)", filename).group(1)
+                # roomID = re.match(r"(?:[^\_]*)(?:[\_])([\d]+)(?:[\_])(?:[^_]*)", filename).group(1)
+                roomID = re.match(r"(?:[^\_]*)(?:[\_])(?:[^_]*)(?:[\_])([\d]+)", filename).group(1)
                 if roomID in roomIDs:
                     # areaSlug = roomIDs[roomID]["areaSlug"]
                     # subareaSlug = roomIDs[roomID]["subareaSlug"]
@@ -351,10 +359,11 @@ def make_annotated(rootPath):
                 roomID = 0
                 if matches:
                     area = matches.group(1)
-                    roomID = matches.group(2)
-                    roomName = matches.group(3).replace("-","")
+                    roomName = matches.group(2).replace("-","")
                     roomName = roomName.replace("Kraids","Kraid")
-                    filename = f"{area}_{roomID}_{roomName}.png"
+                    roomID = matches.group(3)
+                    # filename = f"{area}_{roomID}_{roomName}.png"
+                    filename = f"{area}_{roomName}_{roomID}.png"
                 if not os.path.isdir(
                     os.path.join(
                         ".",
@@ -456,7 +465,8 @@ def make_annotated(rootPath):
                                         ".",
                                         r,
                                         "annotated",
-                                        f"{subareaSlug}_{roomID}_{roomName}.png"
+                                        # f"{subareaSlug}_{roomID}_{roomName}.png"
+                                        f"{subareaSlug}_{roomName}_{roomID}.png"
                                     )
                                 )
                                 annotatedIDs.append(roomID)
@@ -478,33 +488,32 @@ def make_clean(rootPath):
                     area = ""
                     subarea = ""
                     subsubarea = ""
-                    if "rooms" in regionJSON:
-                        for room in regionJSON["rooms"]:
-                            areaPath = os.path.dirname(os.path.join(r, filename)).split(os.sep)
-                            area = room["area"]
-                            subarea = room["subarea"]
-                            subsubarea = (room["subsubarea"] if ("subsubarea" in room) else subsubarea)
-                            areaSlug = areaPath[-1]
-                            subareaSlug = os.path.splitext(filename)[0]
-                            roomIDs[str(room["id"])] = {
-                                "name": room["name"],
-                                "area": area,
-                                "subarea": subarea,
-                                "areaSlug": areaSlug,
-                                "subareaSlug": subareaSlug,
-                                "doors": 0
-                            }
-                            for node in room["nodes"]:
-                                if node["nodeType"] == "door" and node["nodeSubType"] != "elevator":
-                                    roomIDs[str(room["id"])]["doors"] += 1
-                            if subsubarea != "":
-                                roomIDs[str(room["id"])]["subsubsarea"] = subsubarea
-                        msg = f"> Reading {area}/{subarea}"
+                    rooms = regionJSON["rooms"] if "rooms" in regionJSON else [regionJSON]
+                    for room in rooms:
+                        areaPath = os.path.dirname(os.path.join(r, filename)).split(os.sep)
+                        area = room["area"]
+                        subarea = room["subarea"]
+                        subsubarea = (room["subsubarea"] if ("subsubarea" in room) else subsubarea)
+                        areaSlug = areaPath[-1]
+                        subareaSlug = os.path.splitext(filename)[0]
+                        roomIDs[str(room["id"])] = {
+                            "name": room["name"],
+                            "area": area,
+                            "subarea": subarea,
+                            "areaSlug": areaSlug,
+                            "subareaSlug": subareaSlug,
+                            "doors": 0
+                        }
+                        for node in room["nodes"]:
+                            if node["nodeType"] == "door" and node["nodeSubType"] != "elevator":
+                                roomIDs[str(room["id"])]["doors"] += 1
                         if subsubarea != "":
-                            msg += f"/{subsubarea}"
-                        # print(msg)
-                    else:
-                        print(f"!!! {os.path.join(r,filename)} has no rooms!")
+                            roomIDs[str(room["id"])]["subsubsarea"] = subsubarea
+                    msg = f"> Reading {area}/{subarea}"
+                    if subsubarea != "":
+                        msg += f"/{subsubarea}"
+                    msg += f"/{room['name']}"
+                    print(msg)
             if ".png" in filename and "region_" in filename:
                 # Region Image
                 print(f" > Opening {filename}")
@@ -602,7 +611,8 @@ def make_clean(rootPath):
                                         r,
                                         "roomDiagrams",
                                         "clean",
-                                        f"{subareaSlug}_{roomID}_{roomName}.png"
+                                        # f"{subareaSlug}_{roomID}_{roomName}.png"
+                                        f"{subareaSlug}_{roomName}_{roomID}.png"
                                     )
                                 )
                                 cleanIDs.append(roomID)
